@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "GraphGenerator",
+            "request": "launch",
+            "mainClass": "navigatorlh.GraphGenerator",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
+            "name": "NavigatorLH",
+            "request": "launch",
+            "mainClass": "navigatorlh.NavigatorLH",
+            "projectName": "app",
+            "args": [
+                ".\\app\\src\\main\\resources\\haute-normandie.map"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${file}"
+        }
+    ]
+}
