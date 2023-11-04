@@ -33,7 +33,6 @@ public class GraphGenerator {
 
     public GraphGenerator() {
         this.graph = new MultiGraph("Graph");
-
     }
 
     public void ajouterOSM(File fichier) throws IOException, JDOMException {

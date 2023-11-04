@@ -50,30 +50,51 @@ import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
-import javax.swing.*;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.MultiGraph;
+import org.graphstream.stream.file.FileSinkDGS;
+import org.graphstream.stream.file.FileSource;
+import org.graphstream.stream.file.FileSourceDGS;
 
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.prefs.Preferences;
+import java.awt.event.*;
 
-public final class NavigatorLH {
+public final class NavigatorLH implements ActionListener {
     private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
     private static final boolean SHOW_DEBUG_LAYERS = false;
     private static final boolean SHOW_RASTER_MAP = false;
 
     private static final String MESSAGE = "Are you sure you want to exit the application?";
     private static final String TITLE = "Confirm close";
+    private static final String GRAPH_LE_HAVRE = ".\\app\\src\\main\\resources\\graph.dgs";
+    private JTextField txtDepart = new JTextField(20);
+    private JTextField txtArrive = new JTextField(20);
+    private JButton btnSubmit = new JButton("Submit");
+    private org.graphstream.graph.Graph graph = new MultiGraph("Le Havre");
 
-    private static final JTextField txtDepart = new JTextField(20);
-    private static final JTextField txtArrive = new JTextField(20);
-    private static final JButton btnSubmit = new JButton("Submit");
+    public NavigatorLH() {
+        this.startAndLoadUI();
+
+        // Load Graph by graph.dgs
+        FileSource source = new FileSourceDGS();
+        source.addSink(this.graph);
+        try {
+            source.readAll(GRAPH_LE_HAVRE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Starts the {@code Samples}.
@@ -81,11 +102,12 @@ public final class NavigatorLH {
      * @param args command line args: expects the map files as multiple parameters
      *             with possible SRTM hgt folder as 1st argument.
      */
-    public static void main(String[] args) {
+    public void startAndLoadUI() {
         // Square frame buffer
         Parameters.SQUARE_FRAME_BUFFER = false;
 
         HillsRenderConfig hillsCfg = null;
+        String[] args = new String[] { ".\\app\\src\\main\\resources\\haute-normandie.map" };
         File demFolder = getDemFolder(args);
         if (demFolder != null) {
             MemoryCachingHgtReaderTileSource tileSource = new MemoryCachingHgtReaderTileSource(
@@ -100,7 +122,8 @@ public final class NavigatorLH {
         final MapView mapView = createMapView();
         final BoundingBox boundingBox = addLayers(mapView, mapFiles, hillsCfg);
 
-        final PreferencesFacade preferencesFacade = new JavaPreferences(Preferences.userNodeForPackage(NavigatorLH.class));
+        final PreferencesFacade preferencesFacade = new JavaPreferences(
+                Preferences.userNodeForPackage(NavigatorLH.class));
 
         final JFrame frame = new JFrame();
         frame.setTitle("Navigator LH");
@@ -115,7 +138,7 @@ public final class NavigatorLH {
         inputPanel.add(new JLabel("Point Arrive"));
         inputPanel.add(txtArrive);
         inputPanel.add(btnSubmit);
-
+        btnSubmit.addActionListener(this);
         frame.add(inputPanel, BorderLayout.NORTH);
 
         frame.add(mapView, BorderLayout.CENTER);
@@ -267,7 +290,15 @@ public final class NavigatorLH {
         return result;
     }
 
-    private NavigatorLH() {
-        throw new IllegalStateException();
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        this.findRoute(this.txtArrive.getText(), this.txtDepart.getText());
+    }
+
+    private void findRoute(String arrive, String depart) {
+    }
+
+    public static void main(String[] args) {
+        new NavigatorLH();
     }
 }
