@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AStarTest",
+            "request": "launch",
+            "mainClass": "navigatorlh.Samples.AStarTest",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "navigatorlh.Test",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
+            "name": "GraphGenerator",
+            "request": "launch",
+            "mainClass": "navigatorlh.Model.GraphGenerator",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
             "name": "GraphGenerator",
             "request": "launch",
             "mainClass": "navigatorlh.GraphGenerator",

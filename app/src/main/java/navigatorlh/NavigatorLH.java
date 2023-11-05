@@ -50,6 +50,8 @@ import org.mapsforge.map.model.common.PreferencesFacade;
 import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
+import navigatorlh.Model.GraphGenerator;
+
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -81,19 +83,13 @@ public final class NavigatorLH implements ActionListener {
     private JTextField txtDepart = new JTextField(20);
     private JTextField txtArrive = new JTextField(20);
     private JButton btnSubmit = new JButton("Submit");
-    private org.graphstream.graph.Graph graph = new MultiGraph("Le Havre");
+    private GraphGenerator graph;
 
     public NavigatorLH() {
         this.startAndLoadUI();
 
         // Load Graph by graph.dgs
-        FileSource source = new FileSourceDGS();
-        source.addSink(this.graph);
-        try {
-            source.readAll(GRAPH_LE_HAVRE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.graph = new GraphGenerator();
     }
 
     /**
