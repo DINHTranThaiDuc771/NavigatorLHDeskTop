@@ -19,6 +19,8 @@
 package navigatorlh;
 
 import org.mapsforge.core.graphics.GraphicFactory;
+import org.mapsforge.core.graphics.Paint;
+import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.BoundingBox;
 import org.mapsforge.core.model.Dimension;
 import org.mapsforge.core.model.LatLong;
@@ -43,6 +45,7 @@ import org.mapsforge.map.layer.hills.DemFolderFS;
 import org.mapsforge.map.layer.hills.DiffuseLightShadingAlgorithm;
 import org.mapsforge.map.layer.hills.HillsRenderConfig;
 import org.mapsforge.map.layer.hills.MemoryCachingHgtReaderTileSource;
+import org.mapsforge.map.layer.overlay.Polyline;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.model.IMapViewPosition;
 import org.mapsforge.map.model.Model;
@@ -51,10 +54,12 @@ import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
 import navigatorlh.Model.GraphGenerator;
+import navigatorlh.View.AutoComplete;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.Path;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDGS;
 import org.graphstream.stream.file.FileSource;
@@ -62,6 +67,7 @@ import org.graphstream.stream.file.FileSourceDGS;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +77,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.prefs.Preferences;
 import java.awt.event.*;
+import java.awt.geom.Arc2D.Double;
 
 public final class NavigatorLH implements ActionListener {
     private static final GraphicFactory GRAPHIC_FACTORY = AwtGraphicFactory.INSTANCE;
@@ -80,16 +87,17 @@ public final class NavigatorLH implements ActionListener {
     private static final String MESSAGE = "Are you sure you want to exit the application?";
     private static final String TITLE = "Confirm close";
     private static final String GRAPH_LE_HAVRE = ".\\app\\src\\main\\resources\\graph.dgs";
-    private JTextField txtDepart = new JTextField(20);
-    private JTextField txtArrive = new JTextField(20);
+    private JComboBox txtDepart;
+    private JComboBox txtArrive;
     private JButton btnSubmit = new JButton("Submit");
     private GraphGenerator graph;
+    private MapView mapView;
 
     public NavigatorLH() {
-        this.startAndLoadUI();
-
         // Load Graph by graph.dgs
         this.graph = new GraphGenerator();
+        this.startAndLoadUI();
+
     }
 
     /**
@@ -115,7 +123,7 @@ public final class NavigatorLH implements ActionListener {
         }
 
         List<File> mapFiles = SHOW_RASTER_MAP ? null : getMapFiles(args);
-        final MapView mapView = createMapView();
+        mapView = createMapView();
         final BoundingBox boundingBox = addLayers(mapView, mapFiles, hillsCfg);
 
         final PreferencesFacade preferencesFacade = new JavaPreferences(
@@ -126,15 +134,17 @@ public final class NavigatorLH implements ActionListener {
         frame.setLayout(new BorderLayout());
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
-        int textFieldHeight = 20;
-        txtDepart.setPreferredSize(new java.awt.Dimension(txtDepart.getPreferredSize().width, textFieldHeight));
-        txtArrive.setPreferredSize(new java.awt.Dimension(txtArrive.getPreferredSize().width, textFieldHeight));
+        txtDepart = new AutoComplete(this.graph.getName_ID().keySet().toArray());
+        txtArrive = new AutoComplete(this.graph.getName_ID().keySet().toArray());
+        txtArrive.setEditable(true);
+        txtDepart.setEditable(true);
         inputPanel.add(new JLabel("Point Depart"));
         inputPanel.add(txtDepart);
         inputPanel.add(new JLabel("Point Arrive"));
         inputPanel.add(txtArrive);
         inputPanel.add(btnSubmit);
         btnSubmit.addActionListener(this);
+
         frame.add(inputPanel, BorderLayout.NORTH);
 
         frame.add(mapView, BorderLayout.CENTER);
@@ -288,10 +298,33 @@ public final class NavigatorLH implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        this.findRoute(this.txtArrive.getText(), this.txtDepart.getText());
+        this.findRoute((String) txtDepart.getSelectedItem(), (String) txtArrive.getSelectedItem());
     }
 
     private void findRoute(String arrive, String depart) {
+        Path path = this.graph.findRoute(depart, arrive);
+        if (mapView.getLayerManager().getLayers().size() > 1) {
+            mapView.getLayerManager().getLayers().remove(1);
+
+        }
+        // Test Route drawing
+        // instantiating the paint object
+        Paint paint = AwtGraphicFactory.INSTANCE.createPaint();
+        paint.setColor(org.mapsforge.core.graphics.Color.BLACK);
+        paint.setStrokeWidth(6);
+        paint.setStyle(Style.STROKE);
+
+        // instantiating the polyline object
+        Polyline polyline = new Polyline(paint, AwtGraphicFactory.INSTANCE);
+
+        // set lat lng for the polyline
+        List<LatLong> coordinateList = polyline.getLatLongs();
+        for (Node node : path.getNodePath()) {
+            coordinateList.add(new LatLong((double) node.getAttribute("lat"), (double) node.getAttribute("lon")));
+        }
+
+        // adding the layer to the mapview
+        mapView.getLayerManager().getLayers().add(polyline);
     }
 
     public static void main(String[] args) {

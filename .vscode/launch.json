@@ -6,6 +6,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AutoComplete",
+            "request": "launch",
+            "mainClass": "navigatorlh.View.AutoComplete",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "navigatorlh.View.Test",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
+            "name": "Autocomplete",
+            "request": "launch",
+            "mainClass": "navigatorlh.View.Autocomplete",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
+            "name": "Autocomplete",
+            "request": "launch",
+            "mainClass": "navigatorlh.Autocomplete",
+            "projectName": "app"
+        },
+        {
+            "type": "java",
             "name": "AStarTest",
             "request": "launch",
             "mainClass": "navigatorlh.Samples.AStarTest",

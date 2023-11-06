@@ -7,6 +7,7 @@ import org.graphstream.algorithm.AStar.Costs;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.Path;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDGS;
 import org.graphstream.ui.view.Viewer;
@@ -31,6 +32,10 @@ public class GraphGenerator {
 
     private final Graph graph;
     private HashMap<String, ArrayList<String>> name_ID = new HashMap<>();
+    public HashMap<String, ArrayList<String>> getName_ID() {
+        return name_ID;
+    }
+
     private HashMap<String, String> id_name_LiaData = new HashMap<>();
     private HashSet<String> lstIdNode = new HashSet<String>();
     private Quad quadTree;
@@ -302,7 +307,7 @@ public class GraphGenerator {
             if (secondsGap < 0)
             {   
                 // If the arrival time is the next day, we add 86400 seconds to the gap
-                
+
                 secondsGap = 86400 + secondsGap;
             }
             edge.setAttribute("weight", secondsGap);
@@ -355,23 +360,22 @@ public class GraphGenerator {
     public static void main(String[] args) throws IOException, JDOMException {
         GraphGenerator graphGenerator = new GraphGenerator();
         graphGenerator.sauvegarder();
-        // AStar astar = new AStar(graphGenerator.graph);
-        // astar.compute("1189922134", "8194887702");
-        // System.out.println(astar.getShortestPath());
-        // System.out.println(astar.getShortestPath().getPathWeight("weight"));
-        graphGenerator.findRoute("1189922134", "10066724890");
+
+        // graphGenerator.findRoute("1189922134", "8165170497");
 
     }
 
-    public void findRoute(String depart, String arrive) {
+    public Path findRoute(String depart, String arrive) {
         // AStar astar = new AStar(this.graph);
         // astar.compute(arrive, depart);
         // System.out.println(astar.getShortestPath());
+        String nameDepart = name_ID.get(depart).get(0);
+        String nameArrive = name_ID.get(arrive).get(0);
         Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, null, "weight");
         dijkstra.init(graph);
-        dijkstra.setSource(graph.getNode(depart));
+        dijkstra.setSource(graph.getNode(nameDepart));
         dijkstra.compute();
-        System.out.println(dijkstra.getPath(graph.getNode(arrive)));
-
+        System.out.println(dijkstra.getPath(graph.getNode(nameArrive)));
+        return dijkstra.getPath(graph.getNode(nameArrive));
     }
 }
